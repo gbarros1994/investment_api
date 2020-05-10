@@ -4,14 +4,38 @@ module.exports = {
     async createUser(request, response) {
         const { name, email, password } = request.body;
 
-        const verifyEmail = await User.find().where('email', email);
+        const userExists = await User.findOne().where('email', email);
 
-            const user = await User.create({
-                name,
-                email,
-                password
+        if(userExists) {
+            return response.status(400).json({
+                error: 'user already exists.'
             });
+        }
 
-            return response.json(user)
+        const user = await User.create({
+            name,
+            email,
+            password
+        });
+
+        if(user) {
+            return response.status(200).json({
+                status: true,
+                message: 'User has been registred',
+                content: name
+            });
+        } else {
+            return response.status(400).json({
+                status: false,
+                message: 'Error',
+                content: 'name'
+            })
+        }
     },
+
+    async updateUser(request, response) {
+        response.json({
+            status: true,
+        });
+    }
 };

@@ -1,6 +1,7 @@
 const User = require('../model/User');
 const jwt   = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const authConfig = require('../../config/auth');
 
 module.exports = {
     async store(request, response) {
@@ -13,8 +14,6 @@ module.exports = {
                 error: 'User not found'
             })
         }
-
-        // return response.json(user[0].password)
 
         if(!(await bcrypt.compare(password, user[0].password ))) { 
             return response.status(401).json({
