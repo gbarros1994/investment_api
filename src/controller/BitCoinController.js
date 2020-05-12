@@ -1,5 +1,6 @@
 const axios = require('axios');
 const sgMail = require('@sendgrid/mail');
+const Bank = require('../model/Bank');
 require('dotenv').config();
 
 module.exports = {
@@ -21,11 +22,6 @@ module.exports = {
             console.log('error', error);
         });
 
-        
-
-
-
-
 
         const result = await axios.get('https://www.mercadobitcoin.net/api/BTC/ticker/');
 
@@ -46,5 +42,47 @@ module.exports = {
                 message: 'The quotations could not be consulted.'
             })
         }
+    },
+
+    /*O Cliente deve poder fazer compras de bitcoins usando seu saldo disponível na conta.
+     Essa compra será a conversão do valor em reais pela cotação de venda.
+    Deve ser enviado um email informando o valor investido em R$ e o valor comprado de BTC. */
+    async buy(request, response) {
+
+        const { idUser } = request.body;
+
+        var extract = await Bank.find().where('idUser', idUser);
+        console.log(extract[0].value);
+
+        var element = 0;
+        for (let index = 0; index < extract.length; index++) {
+             element += extract[index].value;
+            
+        }
+        console.log(element)
+        
+
+        const result = await axios.get('https://www.mercadobitcoin.net/api/BTC/ticker/');
+
+
+        response.json(result.data.ticker.sell);
+
+    },
+
+    /*O Cliente poderá vender seus bitcoins. O valor será debitado de seus investimentos,
+     na ordem da compra e na cotação do momento do BTC até atingir o valor de saque desejado.
+      O dinheiro deve retornar para a conta dele na plataforma.
+    No caso de venda parcial o investimento deve ser liquidado completamente, e o valor residual
+     deve ser reinvestido usando a cotação original do BTC. As duas transações (saque parcial e
+     investimento) devem estar presentes no extrato.
+    Deve ser enviado um email informando o valor vendido em BTC e o valor resgatado em R$*/
+    async sale(request, response) {
+
+    },
+
+    /*Deverá ser possível listar os depósitos, compras e resgates, com suas respectivas datas e cotações 
+    para o cliente ter transparência do que foi feito nos últimos 90 dias ou por intervalo customizado. */
+    async extract(request, response) {
+
     }
 }

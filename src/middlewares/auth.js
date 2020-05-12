@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const promisify  = require('util');
 const authConfig = require('../../config/auth');
 
 module.exports = {
@@ -17,14 +16,11 @@ module.exports = {
         const [, token] = authHeader.split(' ');
 
         try {
-            // const decoded = await promisify(jwt.verify)(token, '2e3746e131d178d04609038957bfa567');
-            const result = jwt.verify(token, '2e3746e131d178d04609038957bfa567');
+            const result = jwt.verify(token, authConfig().secret);
+
             console.log(result)
-            console.log(authConfig.secret);
 
             return next();
-
-
         } catch (err) {
             return res.status(401).json({
                 status: false,

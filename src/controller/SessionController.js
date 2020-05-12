@@ -29,8 +29,8 @@ module.exports = {
                  name,
                  email,
              },
-             token: jwt.sign({ id }, '2e3746e131d178d04609038957bfa567', {
-                expiresIn: '7d'
+             token: jwt.sign({ id }, authConfig().secret, {
+                expiresIn: authConfig().expiresIn
              }),
          })
     }
