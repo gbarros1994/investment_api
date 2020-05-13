@@ -4,9 +4,8 @@ const bcrypt = require('bcrypt');
 const authConfig = require('../../config/auth');
 
 module.exports = {
-    async store(request, response) {
+    async create(request, response) {
         const { email, password } = request.body;
-
         const user = await User.find().where('email', email);
 
         if (!user) {
@@ -23,16 +22,16 @@ module.exports = {
 
         const { id, name } = user;
 
-         return response.json({
-             user: {
-                 id,
-                 name,
-                 email,
-             },
-             token: jwt.sign({ id }, authConfig().secret, {
-                expiresIn: authConfig().expiresIn
-             }),
-         })
+        return response.json({
+            user: {
+                id,
+                name,
+                email,
+            },
+            token: jwt.sign({ id }, authConfig().secret, {
+               expiresIn: authConfig().expiresIn
+            }),
+        })
     }
 }
     

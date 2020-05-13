@@ -2,10 +2,8 @@ const Bank = require('../model/Bank');
 const User = require('../model/User');
 
 module.exports = {
-    //DEPOSITVA O VALOR NA CONTA DO CLIENTE
-    async createUserDeposit(request, response) {
+    async create(request, response) {
         const { idUser, value, description, status } = request.body;
-
         const existUser = await User.find().where('_id', idUser);
 
         if (existUser) {
@@ -17,36 +15,56 @@ module.exports = {
             });
     
             if (bank) {
-                return response.status(200).json({
+                return response.status(201).json({
                     status: true,
                     content: bank,
-                    message: 'Deposito no valor de: $' +value+ 'reais efetuado com sucesso!'
+                    message: 'Successful deposit!'
                 });
             } else {
-                return response.status(400).json({
+                return response.status(204).json({
                     status: false,
-                    message: 'Não foi possível efeturar o deposito'
+                    content: '',
+                    message: 'Could not make deposit!'
                 });
             }
         } else {
             return response.status(400).json({
                 status: false,
-                message: 'Usuário informado não esta cadastrado.'
+                content: '',
+                message: 'Could not make deposit!'
             });
         }
 
     },
 
     //TRAS O VALOR EM CONTA DO CLIENTE
-    async extractUser(request, response) {
+    async extract(request, response) {
        const extract = await Bank.find().where('idUser', request.params.id);
-       console.log(extract)
 
-      const teste = Bank.aggregate([{
-        $count: extract[0]
-      }])
-       console.log(teste)
+        const sumResult = extract.map(a => {
+            const extract =+ a.value;
+            return extract
+        })
 
-      return response.json(teste)
+        const numbers = sumResult;
+        const sum = (acumulado, x) => acumulado + x;
+        const total = numbers.reduce(sum);
+
+        if (total) {
+            return response.status(200).json({
+                status: true,
+                message: 'Account balance ',
+                content: {
+                    idUser: request.params.id,
+                    value: total
+                }
+            });
+        } else {
+            return response.status(400).json({
+                status: true,
+                message: 'Could not query.',
+                content: ''
+            });
+        }
     }
 };

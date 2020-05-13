@@ -5,24 +5,6 @@ require('dotenv').config();
 
 module.exports = {
     async price(request, response) {
-
-        // process.env.SENDGRID_API_KEY = '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';
-        sgMail.setApiKey('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');
-        const msg = {
-            to: "gersonalifer@hotmail.com",
-            from: "gersonalifear@hotmail.com",
-            subject: "Send grid",
-            text: "super facil",
-            html: "<strong>kk</strong>"
-        };
-
-       sgMail.send(msg).then(() => {
-        res.redirect('/users');
-        }).catch((error) => {
-            console.log('error', error);
-        });
-
-
         const result = await axios.get('https://www.mercadobitcoin.net/api/BTC/ticker/');
 
         if (result) {
@@ -30,43 +12,76 @@ module.exports = {
                 buy: result.data.ticker.buy,
                 sell: result.data.ticker.sell
             };
-            response.json({
-                content: priceBTC,
+            response.status(201).json({
                 status: true,
-                message: 'Quotation found successfully!'
+                message: 'Quotation found successfully!',
+                content: priceBTC
             });
         } else {
-            response.json({
-                content: '',
+            response.status(400).json({
                 status: false,
-                message: 'The quotations could not be consulted.'
-            })
+                message: 'The quotations could not be consulted.',
+                content: ''
+            });
         }
     },
 
-    /*O Cliente deve poder fazer compras de bitcoins usando seu saldo disponível na conta.
-     Essa compra será a conversão do valor em reais pela cotação de venda.
-    Deve ser enviado um email informando o valor investido em R$ e o valor comprado de BTC. */
     async buy(request, response) {
 
-        const { idUser } = request.body;
+        const { idUser, quantity } = request.body;
+        const extract = await Bank.find().where('idUser', idUser);
 
-        var extract = await Bank.find().where('idUser', idUser);
-        console.log(extract[0].value);
+        const sumResult = extract.map(a => {
+            const extract =+ a.value;
+            return extract
+        })
 
-        var element = 0;
-        for (let index = 0; index < extract.length; index++) {
-             element += extract[index].value;
-            
-        }
-        console.log(element)
-        
+        const numbers = sumResult;
+        const sum = (acumulado, x) => acumulado + x;
+        const total = numbers.reduce(sum);
 
         const result = await axios.get('https://www.mercadobitcoin.net/api/BTC/ticker/');
 
+        const totalBuy = quantity * result.data.ticker.sell;
 
-        response.json(result.data.ticker.sell);
 
+        if(total > totalBuy) {
+            const bank = await Bank.create({
+                idUser,
+                value: -totalBuy,
+                description: "compra bitcoin",
+                status: "1"
+            });
+    
+            if (bank) {
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                const msg = {
+                    to: "gersonalifer@hotmail.com",
+                    from: "gersonalifear@hotmail.com",
+                    subject: "Send grid",
+                    text: "Investiment",
+                    html: "<strong>Valor investido "+totalBuy+" </strong><br/><strong>Valor comprado "+quantity+" </strong>"
+                };
+        
+                sgMail.send(msg).then(() => {
+                res.redirect('/users');
+                }).catch((error) => {
+                    console.log('error', error);
+                });
+            } else {
+                response.status(400).json({
+                    content: '',
+                    status: false,
+                    message: 'The quotations could not be consulted.'
+                })
+            }
+        } else {
+            response.status(200).json({
+                content: '',
+                status: false,
+                message: 'insufficient funds'
+            })
+        }
     },
 
     /*O Cliente poderá vender seus bitcoins. O valor será debitado de seus investimentos,
@@ -79,10 +94,4 @@ module.exports = {
     async sale(request, response) {
 
     },
-
-    /*Deverá ser possível listar os depósitos, compras e resgates, com suas respectivas datas e cotações 
-    para o cliente ter transparência do que foi feito nos últimos 90 dias ou por intervalo customizado. */
-    async extract(request, response) {
-
-    }
 }

@@ -1,7 +1,8 @@
 const User = require('../model/User');
+const Bank = require('../model/Bank');
 
 module.exports = {
-    async createUser(request, response) {
+    async create(request, response) {
         const { name, email, password } = request.body;
 
         const userExists = await User.findOne().where('email', email);
@@ -33,9 +34,23 @@ module.exports = {
         }
     },
 
-    async updateUser(request, response) {
-        response.json({
-            status: true,
-        });
+    /*Deverá ser possível listar os depósitos, compras e resgates, com suas respectivas datas e cotações 
+    para o cliente ter transparência do que foi feito nos últimos 90 dias ou por intervalo customizado. */
+    async extract(request, response) {
+        const extract = await Bank.find().where('idUser', request.params.id);
+
+        if (extract) {
+            response.status(200).json({
+                content: extract,
+                status: true,
+                message: 'Quotation found successfully!'
+            });
+        } else {
+            response.status(400).json({
+                content: extract,
+                status: false,
+                message: 'Unable to check balance!'
+            });
+        }
     }
 };
