@@ -36,8 +36,6 @@ module.exports = {
         }
     },
 
-    /*Deverá ser possível listar os depósitos, compras e resgates, com suas respectivas datas e cotações 
-    para o cliente ter transparência do que foi feito nos últimos 90 dias ou por intervalo customizado. */
     async extract(request, response) {
         const extract = await Bank.find().where('idUser', request.params.id);
 

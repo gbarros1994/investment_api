@@ -40,12 +40,4 @@ routes.post('/banks/deposit', celebrate({
 }), BankController.create);
 routes.get('/banks/extract/:id', BankController.extract);
 
-
-//Faça um endpoint que retorne o total de bitcoins comprados e vendidos no dia corrente.
-
-
-/* Deve haver um endpoint com o histórico de valor de compra/venda do bitcoin que retorne o valor
- com frequência de 10 minutos (8:00, 8:10, 8:20, ...) das últimas 24 horas.
-Dados com mais de 90 dias devem ser expurgados automaticamente. */
-
 module.exports = routes;

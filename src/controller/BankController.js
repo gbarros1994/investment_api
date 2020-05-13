@@ -37,7 +37,6 @@ module.exports = {
 
     },
 
-    //TRAS O VALOR EM CONTA DO CLIENTE
     async extract(request, response) {
        const extract = await Bank.find().where('idUser', request.params.id);
 
