@@ -9,7 +9,9 @@ module.exports = {
 
         if(userExists) {
             return response.status(400).json({
-                error: 'user already exists.'
+                status: false,
+                message: 'User already exists.',
+                content: name
             });
         }
 
